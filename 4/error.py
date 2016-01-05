@@ -111,14 +111,13 @@ def jackknife_analysis(observable, bin_width, average = None):
     N = series_length = len(observable)
     N_b = N // k
 
-    if average is None:
-        average = mean(bin_averages)
-
     bins = np.array([observable[i * k : (i + 1) * k] for i in range(N_b)])
     bin_averages = mean(bins, axis = 1)
 
+    if average is None:
+        average = mean(bin_averages)
+
     jackknife_averages = (N * average - k * bin_averages) / (N - k)
-    # fuck python2 up its fucking ass
     jackknife_error = (N_b - 1) / float(N_b) \
                     * ( (jackknife_averages - average)**2 ).sum(axis = 0)
     return jackknife_error
