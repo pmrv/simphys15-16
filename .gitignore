@@ -1,2 +1,6 @@
 *.pdf
 *.gz
+*.npy
+*.dat
+__pycache__
+*.pyc
