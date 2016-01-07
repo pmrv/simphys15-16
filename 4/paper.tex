@@ -1,0 +1,90 @@
+\RequirePackage[l2tabu,orthodox]{nag} % turn on warnings because of bad style
+\documentclass[a4paper,11pt,bibtotoc]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{0394}{\Delta}
+\usepackage[T1]{fontenc}        % Tries to use Postscript Type 1 Fonts for better rendering
+\usepackage{lmodern}            % Provides the Latin Modern Font which offers more glyphs than the default Computer Modern
+\usepackage[intlimits]{amsmath} % Provides all mathematical commands
+
+\usepackage{hyperref}           % Provides clickable links in the PDF-document for \ref
+\usepackage{grffile}            % Allow you to include images (like graphicx). Usage: \includegraphics{path/to/file}
+
+% Allows to set units
+\usepackage[ugly]{units}
+
+% Additional packages
+\usepackage{url}                % Lets you typeset urls. Usage: \url{http://...}
+\usepackage{breakurl}           % Enables linebreaks for urls
+\usepackage{xspace}             % Use \xpsace in macros to automatically insert space based on context. Usage: \newcommand{\es}{ESPResSo\xspace}
+\usepackage{xcolor}             % Obviously colors. Usage: \color{red} Red text
+\usepackage{booktabs}           % Nice rules for tables. Usage \begin{tabular}\toprule ... \midrule ... \bottomrule
+
+% Source code listings
+\usepackage{listings}           % Source Code Listings. Usage: \begin{lstlisting}...\end{lstlisting}
+\lstloadlanguages{python}       % Default highlighting set to "python"
+
+\usepackage{epsfig}
+\usepackage{cleveref}
+\usepackage{subcaption}
+
+\title{Worksheet 4: Error Analysis and Langevin Thermostat}
+\author{Evangelos Ribeiro Tzaras \and Marvin Poul}
+
+\begin{document}
+
+\maketitle
+
+\section{Binning analysis}
+
+The binning error of the five sample data series is plotted in
+\cref{fig:error-binning}, the blocking $\tau$ in \cref{fig:blocking-tau}.
+Eyeballed estimates for the errors and autocorrelation times are given in
+\cref{tab:eyeball}, no estimates are given for the second series, because it
+does not clearly converge.
+
+\begin{table}
+    \centering
+    \caption{error and autocorrelation time estimates}
+    \label{tab:eyeball}
+    \begin{tabular}{clr}
+        \toprule
+        Data series & $\epsilon^2$ & $\tau$ \\
+        \midrule
+        1 & 0.001 & 45 \\
+        3 & 0.0002 & 8  \\
+        4 & 0.00001 & 0.5 \\
+        5 & 0.002 & 100 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{errors-binning}
+    \caption{Binning errors over block size}
+    \label{fig:error-binning}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{blocking-tau}
+    \caption{Blocking $\tau$ over block size}
+    \label{fig:blocking-tau}
+\end{figure}
+
+\section{Jackknife analysis}
+
+The jackknife error of all series is plotted in \cref{fig:error-jackknife}. The
+values from the jackknife analysis match up with the binning analysis pretty
+closely, their relative deviation is smaller than $5\,\%$, for this reason the
+same estimates are given in \cref{tab:eyeball}.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{errors-jackknife}
+    \caption{Jackknife errors over block size}
+    \label{fig:error-jackknife}
+\end{figure}
+
+\end{document}
