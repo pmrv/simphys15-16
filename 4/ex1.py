@@ -11,7 +11,7 @@ def calc():
         series = pickle.load(fdata).T
 
     averages  = error.mean(series)
-    variances = error.variance(series)
+    variances = error.variance(series, averages)
 
     # jackknife stuff
     jackknife_errors = np.array([error.jackknife_analysis(series, k, averages)
@@ -39,13 +39,10 @@ def plot():
 
     binning_results = np.load("binning.npy")
     jackknife_errors = np.load("jackknife.npy")
-    autocorrelation_results = np.load("autocorrelation.npy")
-    autocorrelation_errors = autocorrelation_results[1]
 
     plt.subplot(211)
     plt.xlabel("$k$")
     plt.ylabel("$\epsilon^2$")
-    plt.title("jackknife")
     plt.plot(jackknife_errors.T[0], label = "1")
     plt.plot(jackknife_errors.T[1], label = "2")
     plt.plot(jackknife_errors.T[2], label = "3")
@@ -59,14 +56,10 @@ def plot():
     plt.subplot(212)
     plt.xlabel("$k$")
     plt.ylabel("$\epsilon^2$")
-    plt.title("binning")
-    plt.plot(binning_errors.T[0], label = "1")
-    plt.plot(binning_errors.T[1], label = "2")
-    plt.plot(binning_errors.T[2], label = "3")
-    plt.plot(binning_errors.T[4], label = "5")
+    plt.plot(jackknife_errors.T[3], label = "4")
 
     plt.legend(loc = "upper left")
-    plt.savefig("errors_big.pdf")
+    plt.savefig("errors-jackknife.pdf")
     plt.clf()
 
     # plot last data set seperately because it's pretty small compared to the
@@ -74,8 +67,10 @@ def plot():
     plt.subplot(211)
     plt.xlabel("$k$")
     plt.ylabel("$\epsilon^2$")
-    plt.title("jackknife")
-    plt.plot(jackknife_errors.T[3], label = "4")
+    plt.plot(binning_errors.T[0], label = "1")
+    plt.plot(binning_errors.T[1], label = "2")
+    plt.plot(binning_errors.T[2], label = "3")
+    plt.plot(binning_errors.T[4], label = "5")
 
     plt.legend(loc = "upper left")
 
@@ -86,7 +81,7 @@ def plot():
     plt.plot(binning_errors.T[3], label = "4")
 
     plt.legend(loc = "upper left")
-    plt.savefig("errors_small.pdf")
+    plt.savefig("errors-binning.pdf")
     plt.clf()
 
     plt.subplot(211)
