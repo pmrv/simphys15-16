@@ -35,6 +35,45 @@
 
 \maketitle
 
+\section{Autocorrelation Analysis}
+
+The autocorrelation function for all five series are plotted in \cref{fig:acf}
+for all $k < 2000$ and its running sum in \cref{fig:iat}. The
+integrated autocorrelation times are put in \cref{tab:auto}. Integrating over
+a large interval seems numerically, because in the definition of the
+autocorrelation function $\langle A_iA_{i + k}\rangle \simeq \langle A_i\rangle^2$ as the samples become
+more and more uncorrelated and we then subtract number of about the same size, which
+introduces large errors. This can be seen in the fluctuations in
+\cref{fig:acf}. Summing over this just exaggerates this and leads e.g. to
+decreasing $\tau$ as seen in series $1$ in \cref{fig:iat} or even negative ones
+when larges $k$ are considered.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=.7\textwidth]{autocorrelation}
+    \caption{autocorrelation functions (top) and integrated autocorrelation
+    times}
+    \label{fig:acf}
+    \label{fig:iat}
+\end{figure}
+
+\begin{table}
+    \centering
+    \caption{Results from autocorrelation analysis}
+    \label{tab:auto}
+    \begin{tabular}{rrrrrr}
+        \toprule
+    series &  $\langle A \rangle$ &  $\epsilon_A^2$ &  $\tau$ &  $\epsilon_\tau^2$ &  $N_\mathrm{eff}$ \\
+    \midrule
+    1 & 1.98492 & 0.00048 & 51.45368 & 0.11127 & 1943 \\
+    2 & -3.91072 & 0.00324 & 323.25297 & 0.27860 & 309 \\
+    3 & 6.00094 & 0.00010 & 9.87739 & 0.04919 & 10124 \\
+    4 & -7.99734 & 0.00001 & 0.50460 & 0.01342 & 198177 \\
+    5 & 10.01297 & 0.00114 & 112.91853 & 0.16474 & 886 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
 \section{Binning analysis}
 
 The binning error of the five sample data series is plotted in
@@ -45,7 +84,7 @@ does not clearly converge.
 
 \begin{table}
     \centering
-    \caption{error and autocorrelation time estimates}
+    \caption{error and autocorrelation time estimates from graphs}
     \label{tab:eyeball}
     \begin{tabular}{clr}
         \toprule
@@ -61,14 +100,14 @@ does not clearly converge.
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{errors-binning}
+    \includegraphics[width=.7\textwidth]{errors-binning}
     \caption{Binning errors over block size}
     \label{fig:error-binning}
 \end{figure}
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{blocking-tau}
+    \includegraphics[width=.7\textwidth]{blocking-tau}
     \caption{Blocking $\tau$ over block size}
     \label{fig:blocking-tau}
 \end{figure}

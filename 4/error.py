@@ -44,6 +44,7 @@ def autocorrelation_analysis(observable,
     if observable.ndim > 1:
         n = observable.shape[1]
         tau = np.empty(n)
+        k_max = np.empty(n)
         tau[:] = .5
         for i in range(n):
             k = 1
@@ -51,6 +52,8 @@ def autocorrelation_analysis(observable,
                 tau[i] += autocorrelation_function(observable[:,i], k, average[i],
                                                    measurement_variance[i])
                 k += 1
+
+            k_max[i] = k
     else:
         tau = .5
         k = 1
@@ -59,9 +62,11 @@ def autocorrelation_analysis(observable,
                                             measurement_variance)
             k += 1
 
+        k_max = k
+
     N_eff = N / tau
-    e_obs = np.sqrt(measurement_variance / N_eff)
-    e_tau = np.sqrt(12 * tau / N)
+    e_obs = measurement_variance / N_eff
+    e_tau = np.sqrt(2 * (2*k_max + 1) / N)
 
     return np.array( (average, e_obs, tau, e_tau, N_eff) )
 
