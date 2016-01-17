@@ -1,0 +1,83 @@
+\RequirePackage[l2tabu,orthodox]{nag} % turn on warnings because of bad style
+\documentclass[a4paper,11pt,bibtotoc]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{0394}{\Delta}
+\usepackage[T1]{fontenc}        % Tries to use Postscript Type 1 Fonts for better rendering
+\usepackage{lmodern}            % Provides the Latin Modern Font which offers more glyphs than the default Computer Modern
+\usepackage[intlimits]{amsmath} % Provides all mathematical commands
+
+\usepackage{hyperref}           % Provides clickable links in the PDF-document for \ref
+\usepackage{grffile}            % Allow you to include images (like graphicx). Usage: \includegraphics{path/to/file}
+
+% Allows to set units
+\usepackage[ugly]{units}
+
+% Additional packages
+\usepackage{url}                % Lets you typeset urls. Usage: \url{http://...}
+\usepackage{breakurl}           % Enables linebreaks for urls
+\usepackage{xspace}             % Use \xpsace in macros to automatically insert space based on context. Usage: \newcommand{\es}{ESPResSo\xspace}
+\usepackage{xcolor}             % Obviously colors. Usage: \color{red} Red text
+\usepackage{booktabs}           % Nice rules for tables. Usage \begin{tabular}\toprule ... \midrule ... \bottomrule
+
+% Source code listings
+\usepackage{listings}           % Source Code Listings. Usage: \begin{lstlisting}...\end{lstlisting}
+\lstloadlanguages{python}       % Default highlighting set to "python"
+
+\usepackage{epsfig}
+\usepackage{cleveref}
+\usepackage{subcaption}
+
+\title{Worksheet 5: Thermostats, Monte Carlo}
+\author{Evangelos Ribeiro Tzaras \and Marvin Poul}
+
+\begin{document}
+
+\maketitle
+
+\section{Thermostats}
+
+\subsection{Anderson Thermostat}
+
+The Anderson algorithm describes random collisions of the simulated particles
+with a heat bath with a frequency $\nu$, as such the higher $\nu$ the more
+directly are the system dynamics influence the these thermic collisions rather
+than system properties, e.g.\ concentration gradients in the case of the
+diffusivity.
+
+\subsection{Nos\' e-Hoover Thermostat}
+
+Choosing $L = 3N + 1$ leads to the ensemble average in the Nos\' e-ensemble
+being directly equal the ensemble average in the NVT-ensemble, whereas $L = 3N$
+leads to constant time steps.
+
+\subsection{Berendsen Thermostat}
+
+The equipartition theorem gives
+\begin{equation*}
+    \bar v^2 = 3\frac{k_BT}{m}
+\end{equation*}
+for the mean velocity at a given temperature. Rescaling all velocities by
+$\lambda$ then yields for the kinetic energy
+\begin{align*}
+    E_\mathrm{kin}' &= \frac{1}{2}m\bar v'^2 = \frac{1}{2}mv^2\lambda^2 \\
+    &= \frac{3k_B }{2}\left(T + \frac{\Delta t}{\tau_T}(T' - T)\right) \\
+\end{align*}
+or, as the difference between before and after the rescaling,
+\begin{align*}
+    ΔE_\mathrm{kin} &= \frac{3k_B }{2m}\left(T + \frac{\Delta t}{\tau_T}(T' -
+    T)\right) - \frac{3}{2}k_BT \\
+    &= \frac{3k_B}{2\tau_T}\Delta t\Delta T,
+\end{align*}
+where $\Delta T = T' - T$. Formulating this as an energy flux $J =
+\frac{E}{\Delta t}$ gives the desired expression
+\begin{equation*}
+    J = \frac{3k_B}{2\tau_T}\Delta T = \alpha \Delta T
+\end{equation*}
+from which
+\begin{equation*}
+    \alpha = \frac{3k_B}{2\tau_T}
+\end{equation*}
+follows directly by comparison.
+
+\end{document}
