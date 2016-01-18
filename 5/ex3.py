@@ -10,7 +10,7 @@ else:
     from error import mean, variance
 
 def runge(x):
-    return 1 / (1 + x**2)
+    return 1. / (1 + x**2)
 
 def exact_runge_integral():
     return np.arctan(5) - np.arctan(-5)
