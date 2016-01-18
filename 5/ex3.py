@@ -22,6 +22,13 @@ def simple_sampling(f, a, b, N):
 
 if __name__ == "__main__":
 
+    x = np.linspace(-5, 5, 100)
+    plt.plot(x, runge(x))
+    plt.xlabel("$x$")
+    plt.ylabel(r"$\frac{1}{1+x^2}$")
+    plt.savefig("runge.pdf")
+    plt.clf()
+
     exact = exact_runge_integral()
     I          = np.empty(19)
     stat_error = np.empty(19)
@@ -37,4 +44,3 @@ if __name__ == "__main__":
     plt.xlabel("$\log_2 N$")
     plt.ylabel("error")
     plt.savefig("error.pdf")
-    plt.show()
