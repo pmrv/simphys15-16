@@ -1,6 +1,7 @@
 import sys
 import numpy as np
-import copy
+from ex3 import runge
+from matplotlib import pyplot as plt
 
 def metropolis(N, P, trial_move, phi0, dphi = 0.1):
     if (phi0.__class__.__name__ == 'ndarray'):
@@ -29,3 +30,11 @@ def trial_move(phi, dphi = 0.1):
     factor = dphi * (np.random.random()*2 -1) """ Uniform in [-dphi, dphi[ """
     new_phi = phi + factor * np.ones_like(phi)
     return new_phi
+
+if (__name__ == 'main'):
+    phi0 = 0.
+    sam1, acc1 = metropolis(100000, runge, trial_move, phi0, 0.1)
+    sam2, acc2 = metropolis(100000, runge, trial_move, phi0, 1.)
+    sam3, acc3 = metropolis(100000, runge, trial_move, phi0, 10.)
+    sam4, acc4 = metropolis(100000, runge, trial_move, phi0, 100.)
+
