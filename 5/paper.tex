@@ -99,5 +99,62 @@ actual error in \cref{fig:error}. The code used is in the file \texttt{ex3.py}.
     \label{fig:error}
 \end{figure}
 
+\section{Importance Sampling --- Metropolis-Hastings Algorithm}
+
+In the Metropolis-Hastings-Algorithm a number $N$ of samples are generated
+for a given distribution function $P$ starting from an initial state $\phi_0$.
+From a state $\phi_i$ a new state $\phi\prime$ is obtained through a so-called trial move.
+If $P\left(\phi\prime\right) > P\left(\phi_i\right)$ then the state
+$\phi\prime$ is always accepted. Otherwise $\phi\prime$ will be accepted
+with a probabilty of
+$\frac{P\left(\phi\prime\right)}{P\left(\phi_i\right)}$.
+When the state is accepted, the next state is $\phi_{i+1}=\phi\prime$ and
+when it's rejected$\phi_{i+1}=\phi_i$.
+
+In the excercise generated $N$ samples of $x$ that are distributed
+according to the Runge function. The trial move displaces $x$ by a
+uniformly distributed random number $r \in \left[-\Delta x,\Delta x\right]$.
+$N=100000$ samples each were generated for trial move ranges
+$\Delta x \in \left\{0.1, 1.0, 10.0, 100.0\right\}$.
+
+Compairing \cref{fig:hist_runge} and \cref{fig:runge} we can see that both
+the $\Delta x = 1.0$ and $\Delta x = 10.0$ cases yield reasonable results.
+Taking the acceptance ratios for the different trial move ranges into account
+\cref{tab:acceptance} we argue that the $\Delta x = 10.0$ case with an acceptance
+ratio of $\sim 33\%$ is the best choice for $\Delta x$.
+This is because a too high acceptance ratio leads to highly correlated data,
+while a too low ratio will almost never change states and would require
+a larger number of samples in order to obtain reasonable results.
+This can be seen if we look at the $\Delta x = 100.0$ case in our figures:
+The histogram shows high bars surrounded by lower bars although we would expect
+to find a relatively smooth looking 'curve'.
+We could in theory take less bins for the histograms, but this could be unsatisfactory
+when details are to be observed. The trial moves simply 'jump too far'
+and lead to oversampling of certain regions of $x$.
+For $\Delta x = 0.1$ the 'jumps' are very narrow and we can see that the algorithm
+has difficulties giving a correct symmetric result because the region where a transition
+from a state $x<0$ to a state $x>0$ is possible is just $\left]-\Delta x, \Delta x \right[$.
+So once we are on either side of the peak we will likely stay there.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\textwidth]{hist_runge}
+  \caption{Histogram of obtained samples for different trial move ranges}
+  \label{fig:hist_runge}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{c | c}
+    $\Delta x$ & acceptance ratio \\
+    0.1 & 98.3\% \\
+    1.0 & 85.3\% \\
+    10.0 & 33.4\% \\
+    100.0 & 6.1\%
+  \end{tabular}
+ \caption{Acceptance ratio for different trial move ranges}
+ \label{tab:acceptance}
+\end{table}
+
 
 \end{document}
