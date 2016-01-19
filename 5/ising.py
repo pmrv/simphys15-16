@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-from metropolis import metropolis
+
 
 ver = sys.version_info
 if ver.major == 3 and ver.minor > 4:
@@ -10,6 +10,65 @@ else:
     from error import mean, variance
 
 
+
+def boltzmann_distribution(T):
+    return lambda energy: np.exp(-energy./T)
+
+def metropolis(N, P, trial_move, sigma):
+    if (sigma.__class__.__name__ == 'ndarray'):
+        d = sigma.shape[0]
+    else:
+        print('Something went to shit! sigma should be numpy array!\nExiting...')
+        exit(1)
+    samples = np.zeros((N,d))
+    rejects = 0
+    """ used for the calculation of the acceptance rate """
+    for i in range(N):
+        samples[i] = sigma
+        sigma = copy(sigma)
+        i,j = trial_move(sigma)
+        """ Perform trial move """
+        r = np.random.random()
+        """ Draw uniformly distributed random number in the interval [0,1[ """
+        p_ratio = P(sigma)/P(samples[i])
+        p_ratio = np.min([1., p_ratio])
+        if (r >= p_ratio):
+            """ Reject """
+            sigma = samples[i]
+            rejects += 1
+
+    acceptance_rate = float(N-1-rejects) / (N-1)
+    """ N-1 because the initial state should not be included """
+    return samples, acceptance_rate
+
+def flip_random_spin(x):
+    """ Randomly flip a spin """
+    N,M = x.shape
+    i = np.random.randint(N)
+    j = np.random.randint(M)
+    x[i,j] *= -1
+    return i,j
+
+def compute_energy(x, x_maps):
+    """ Computes the total energy for the state x.
+    x_maps is a list of x_maps for every particle. Its' length should be NxM.
+    For more info on x_map see compute_energy_particle(..) and compute_neighbour_map(..)"""
+    energy = 0.
+    for x_map in x_maps:
+        energy += compute_energy_particle(x, x_map)
+    energy *= 0.5
+    return energy
+
+def compute_magnetization(x):
+    """ Computes magnetization of state x. """
+    N,M = x.shape
+    m = 0.
+    for i in range(N):
+        for j in range(M):
+            m += x[i,j]
+    m /= N*M
+    return m
+        
 def compute_energy_particle(x, x_map):
     """ Computes energy of particle (i,j) on the 2d grid specified by x_map
     i is the x-coordinate of the top/bottom point,
@@ -23,7 +82,7 @@ def compute_energy_particle(x, x_map):
     return energy
     
 def compute_neighbour_map(x, i, j):
-    """ x_map holds a list of the 4 closest neighbours in the following order:
+    """ x_map holds a list of the indices of the 4 closest neighbours in the following order:
     left, top, right, bottom. Usage map[2] yields the tuple (k,l) that adresses 
     the right neighbour. Spin of right neighbour would be x[map[2][0],map[2][1]] """
     
