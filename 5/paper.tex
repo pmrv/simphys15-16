@@ -120,8 +120,9 @@ $\Delta x \in \left\{0.1, 1.0, 10.0, 100.0\right\}$.
 Compairing \cref{fig:hist_runge} and \cref{fig:runge} we can see that both
 the $\Delta x = 1.0$ and $\Delta x = 10.0$ cases yield reasonable results.
 Taking the acceptance ratios for the different trial move ranges into account
-\cref{tab:acceptance} we argue that the $\Delta x = 10.0$ case with an acceptance
-ratio of $\sim 33\%$ is the best choice for $\Delta x$.
+\cref{tab:acceptance} we argue that the $\Delta x = 1.0$ case with an acceptance
+ratio of $\sim 85\%$ is the best choice for $\Delta x$ because it looks the smoothest.
+Judging by the acceptrance ratio, we would choose $\Delta x = 10.0$.
 This is because a too high acceptance ratio leads to highly correlated data,
 while a too low ratio will almost never change states and would require
 a larger number of samples in order to obtain reasonable results.
