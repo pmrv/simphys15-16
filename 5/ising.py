@@ -1,6 +1,7 @@
 import numpy as np
 import sys
-
+from copy import copy
+import math
 
 ver = sys.version_info
 if ver.major == 3 and ver.minor > 4:
@@ -12,15 +13,15 @@ else:
 
 
 def boltzmann_distribution(T):
-    return lambda energy: np.exp(-energy./T)
+    return lambda energy: np.exp(-energy/T)
 
 def metropolis(N, P, trial_move, sigma):
     if (sigma.__class__.__name__ == 'ndarray'):
-        d = sigma.shape[0]
+        Lx, Ly = sigma.shape
     else:
         print('Something went to shit! sigma should be numpy array!\nExiting...')
         exit(1)
-    samples = np.zeros((N,d))
+    samples = np.zeros((N,Lx,Ly))
     rejects = 0
     """ used for the calculation of the acceptance rate """
     for i in range(N):
@@ -48,6 +49,35 @@ def flip_random_spin(x):
     j = np.random.randint(M)
     x[i,j] *= -1
     return i,j
+
+def exact_summation(Lx, Ly):
+    """ An unoptimized routine that sums over all possible states (2**(Lx*Ly)) of 
+    the 2D Ising modell. The number of summations could be drastically reduced
+    by grouping terms with the same energy and counting the number of permutations. """
+    x_base = np.ones((Lx,Ly)) * (-1)
+    sites = Lx * Ly
+    N = 2**sites
+    samples = []
+    """ sites is the total number of particles on the grid. N is the number of different states.
+    Initialisation of x_maps follows. """
+    x_maps = []
+    for i in range(Lx):
+        for j in range(Ly):
+            x_maps.append(compute_neighbour_map(x_base, i, j))
+
+    log2 = np.log(2)
+    for i in range(N):
+        x = copy(x_base.reshape(sites))
+        if i == 0:
+            highest_power_of_two = 0
+        else:
+            highest_power_of_two = int(math.log(i) / log2)
+        for exponent in range(highest_power_of_two+1):
+            if i & (1<<exponent):
+                """ alternatively (i << exponent) & 1 should work as a condition too. """
+                x[exponent] = 1
+        samples.append(x)
+    return samples
 
 def compute_energy(x, x_maps):
     """ Computes the total energy for the state x.
