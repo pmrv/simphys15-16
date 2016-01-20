@@ -2,6 +2,7 @@ import numpy as np
 import sys
 from copy import copy
 import math
+from matplotlib import pyplot as plt
 
 ver = sys.version_info
 if ver.major == 3 and ver.minor > 4:
@@ -24,6 +25,13 @@ def metropolis(N, P, trial_move, sigma):
     samples = np.zeros((N,Lx,Ly))
     rejects = 0
     """ used for the calculation of the acceptance rate """
+    x_maps = []
+    for i in range(Lx):
+        for j in range(Ly):
+            x_maps.append(compute_neighbour_map(sigma, i, j))
+    """ x_maps like before for the computation of the energies.
+    Note: We were late for the excercise and didn't care for the recomputation of the energies """
+    last_energy = compute_energy(sigma, x_maps)
     for i in range(N):
         samples[i] = sigma
         sigma = copy(sigma)
@@ -31,12 +39,16 @@ def metropolis(N, P, trial_move, sigma):
         """ Perform trial move """
         r = np.random.random()
         """ Draw uniformly distributed random number in the interval [0,1[ """
-        p_ratio = P(sigma)/P(samples[i])
+        energy = compute_energy(sigma, x_maps)
+        last_energy = compute_energy(samples[i], x_maps)
+        p_ratio = P(energy-last_energy)
         p_ratio = np.min([1., p_ratio])
         if (r >= p_ratio):
             """ Reject """
             sigma = samples[i]
             rejects += 1
+#        else:
+#            last_energy = energy
 
     acceptance_rate = float(N-1-rejects) / (N-1)
     """ N-1 because the initial state should not be included """
@@ -58,6 +70,8 @@ def exact_summation(Lx, Ly):
     sites = Lx * Ly
     N = 2**sites
     samples = []
+    energies = []
+    sum_spins = []
     """ sites is the total number of particles on the grid. N is the number of different states.
     Initialisation of x_maps follows. """
     x_maps = []
@@ -73,11 +87,18 @@ def exact_summation(Lx, Ly):
         else:
             highest_power_of_two = int(math.log(i) / log2)
         for exponent in range(highest_power_of_two+1):
+            """ Basic idea: Each bit represents a single particle/spin. If the bit is 1 it corresponds
+            to spin up (+1) otherwise spin down (-1)"""
             if i & (1<<exponent):
-                """ alternatively (i << exponent) & 1 should work as a condition too. """
                 x[exponent] = 1
+        x = x.reshape((Lx,Ly))
+        energy = compute_energy(x, x_maps)
+        sum_spin = compute_magnetization(x)
         samples.append(x)
-    return samples
+        energies.append(energy)
+        sum_spins.append(sum_spin)
+
+    return samples, energies, sum_spins
 
 def compute_energy(x, x_maps):
     """ Computes the total energy for the state x.
@@ -136,6 +157,44 @@ if __name__ == '__main__':
         L = int(sys.argv[1])
     else:
         L = 4
-    """ initialising starting state with 1 and -1 """
+    """ Metropolis Sampling!
+    Initialising starting state with 1 and -1 """
+    Ts = np.arange(1.,5.1,0.1)
     x = np.random.random((L,L)) *2 -1
     sigma = (x < 0) * (-1) + (x > 0) * 1
+    x_maps = []
+    for i in range(L):
+        for j in range(L):
+            x_maps.append(compute_neighbour_map(x, i, j))
+
+    samples_metropolis = [ metropolis(10000, boltzmann_distribution(T), flip_random_spin, sigma)[0] for T in Ts ]
+    sum_spins_metropolis = [ [ compute_magnetization(sample) for sample in samples ] for samples in samples_metropolis ]
+#    mean_energy_per_site_metropolis = np.array([ [mean(compute_energy(sample, x_maps)) for sample in samples ] for samples in samples_metropolis ]) / (L*L)
+    mean_energy_per_site_metropolis = np.array([ mean( np.array([ compute_energy(sample, x_maps) for sample in samples ]) ) for samples in samples_metropolis ]) / (L*L)
+    mean_magnetization_per_site_metropolis = [ mean(np.abs(sum_spin)) for sum_spin in sum_spins_metropolis ]
+
+    """ Exact summation! """
+    samples_exact, energies_exact, sum_spins_exact = exact_summation(L,L)
+    N = len(samples_exact)
+    Ts = np.arange(1.,5.1,0.1)
+    probabilities = [ [ boltzmann_distribution(T)(energy) for energy in energies_exact ] for T in Ts ]
+    Zs = [ np.sum( p ) for p in probabilities ]
+    """ Zs is the partition function for the exact summation case.
+    This is used for the computation of the mean values of the energy and magnetization"""
+    mean_energy_per_site_exact = np.array([ np.average(energies_exact, weights=(probabilities[i]/Zs[i])) for i in range(len(Ts)) ]) / (L*L)
+    mean_magnetization_per_site_exact = np.array([ np.average(np.abs(sum_spins_exact), weights=(probabilities[i]/Zs[i])) for i in range(len(Ts)) ])
+
+    """ Plotting """
+    plt.xlabel("Temperature (T)")
+    plt.ylabel("mean energy per site (e)")
+    plt.plot(Ts, mean_energy_per_site_exact, label="Exact summation")
+    plt.plot(Ts, mean_energy_per_site_metropolis, label="Metropolis Monte Carlo")
+    plt.legend()
+    plt.savefig("energy_per_site.pdf")
+    plt.clf()
+    plt.xlabel("Temperature (T)")
+    plt.ylabel("mean magnetization per site (m)")
+    plt.plot(Ts, mean_magnetization_per_site_exact, label="Exact summation")
+    plt.plot(Ts, mean_magnetization_per_site_metropolis, label="Metropolis Monte Carlo")
+    plt.legend()
+    plt.savefig("magnetization_per_site.pdf")
