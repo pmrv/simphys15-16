@@ -158,4 +158,56 @@ So once we are on either side of the peak we will likely stay there.
 \end{table}
 
 
+\section{2D Ising Model --- Exact Summation vs Metropolis Monte Carlo}
+
+In this excercise we simulated the 2 dimensional Ising model on a square lattice
+(LxL) with periodic boundary conditions. $\sigma_{i,j}$ corresponds to the spin
+at lattice position $(i,j)$. As no external field is present the (total) energy
+of the system is given by
+
+\begin{align}
+  E &= \frac{1}{2} \sum_{i=0}^{L-1} \sum_{j=0}^{L-1} E_{i,j} \\
+  E_{i,j} &= -\sigma_{i,j} \left(\sigma_{i-1,j} + \sigma_{i+1,j} + \sigma_{i,j-1} + \sigma_{i,j+1} \right)
+\end{align}
+
+We were interested in two observables, namely the (mean) \textit{energy per site} $e$
+and the (mean) \textit{magnetization per site} $m$, which are defined as follows
+
+\begin{align}
+  e &= \left\langle \frac{E}{L^2} \right\rangle \\
+  m &= \left\langle \left| \mu \right| \right \rangle \\
+  \mu &= \frac{1}{L^2} \sum_{i=0}^{L-1} \sum_{j=0}^{L-1} \sigma_{i,j}
+\end{align}
+
+The two methods we used for the study of our system are
+\begin{itemize}
+  \item Exact summation over all $2^{4*4}=65536$ states
+  \item Metropolis Monte Carlo as described in the previous section
+\end{itemize}
+
+While the exact summation obviously gives exact results the computational cost grows
+exponentially with the number of spins in the system.
+Exact summation for larger systems is not computationally feasible.
+The Monte Carlo simulation was performed to yield 10000 samples.
+The results can be seen in \cref{fig:energy_per_site} and \cref{fig:magnetization_per_site}.
+We can see that the MC results are somewhat 'jiggery' which is due to the fact that we only generate
+a relatively small number of samples.
+Overall we have good agreement from both results and although this may not be the case for our
+(4x4) system, for larger systems the MC simulation will always outperform exact summation.
+    
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\textwidth]{energy_per_site}
+  \caption{Mean energy per site}
+  \label{fig:energy_per_site}
+\end{figure}
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\textwidth]{magnetization_per_site}
+  \caption{Mean magnetization per site}
+  \label{fig:magnetization_per_site}
+\end{figure}
+
+
 \end{document}
