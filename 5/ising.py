@@ -3,6 +3,7 @@ import sys
 from copy import copy
 import math
 from matplotlib import pyplot as plt
+import pickle
 
 ver = sys.version_info
 if ver.major == 3 and ver.minor > 4:
@@ -34,15 +35,14 @@ def metropolis(N, P, trial_move, sigma):
     last_energy = compute_energy(sigma, x_maps)
     for i in range(N):
         samples[i] = sigma
-        sigma = copy(sigma)
-        i,j = trial_move(sigma)
+        sigma = trial_move(sigma)
         """ Perform trial move """
         r = np.random.random()
         """ Draw uniformly distributed random number in the interval [0,1[ """
         energy = compute_energy(sigma, x_maps)
         last_energy = compute_energy(samples[i], x_maps)
         p_ratio = P(energy-last_energy)
-        p_ratio = np.min([1., p_ratio])
+#        p_ratio = np.min([1., p_ratio])
         if (r >= p_ratio):
             """ Reject """
             sigma = samples[i]
@@ -59,8 +59,9 @@ def flip_random_spin(x):
     N,M = x.shape
     i = np.random.randint(N)
     j = np.random.randint(M)
-    x[i,j] *= -1
-    return i,j
+    x_new = copy(x)
+    x_new[i,j] *= -1
+    return x_new
 
 def exact_summation(Lx, Ly):
     """ An unoptimized routine that sums over all possible states (2**(Lx*Ly)) of 
@@ -198,3 +199,8 @@ if __name__ == '__main__':
     plt.plot(Ts, mean_magnetization_per_site_metropolis, label="Metropolis Monte Carlo")
     plt.legend()
     plt.savefig("magnetization_per_site.pdf")
+
+
+    """ Pickle dumps for debugging """
+    with open('ising.dat', 'w') as datafile:
+        pickle.dump([Ts, samples_metropolis], datafile)
