@@ -18,11 +18,10 @@ def boltzmann_distribution(T):
     return lambda energy: np.exp(-energy/T)
 
 def metropolis(N, P, trial_move, sigma):
-    if (sigma.__class__.__name__ == 'ndarray'):
+    if isinstance(sigma, np.ndarray):
         Lx, Ly = sigma.shape
     else:
-        print('Something went to shit! sigma should be numpy array!\nExiting...')
-        exit(1)
+        raise ValueError('sigma has to be a ndarray')
     samples = np.zeros((N,Lx,Ly))
     rejects = 0
     """ used for the calculation of the acceptance rate """
@@ -64,7 +63,7 @@ def flip_random_spin(x):
     return x_new
 
 def exact_summation(Lx, Ly):
-    """ An unoptimized routine that sums over all possible states (2**(Lx*Ly)) of 
+    """ An unoptimized routine that sums over all possible states (2**(Lx*Ly)) of
     the 2D Ising modell. The number of summations could be drastically reduced
     by grouping terms with the same energy and counting the number of permutations. """
     x_base = np.ones((Lx,Ly)) * (-1)
@@ -103,7 +102,7 @@ def exact_summation(Lx, Ly):
 
 def compute_energy(x, x_maps):
     """ Computes the total energy for the state x.
-    x_maps is a list of x_maps for every particle. Its' length should be NxM.
+    x_maps is a list of x_maps for every particle. Its length should be NxM.
     For more info on x_map see compute_energy_particle(..) and compute_neighbour_map(..)"""
     energy = 0.
     for x_map in x_maps:
@@ -120,7 +119,7 @@ def compute_magnetization(x):
             m += x[i,j]
     m /= N*M
     return m
-        
+
 def compute_energy_particle(x, x_map):
     """ Computes energy of particle (i,j) on the 2d grid specified by x_map
     i is the x-coordinate of the top/bottom point,
@@ -132,15 +131,15 @@ def compute_energy_particle(x, x_map):
     sum_spin =np.sum( [spin_map(indices) for indices in x_map ] )
     energy = -xij * sum_spin
     return energy
-    
+
 def compute_neighbour_map(x, i, j):
     """ x_map holds a list of the indices of the 4 closest neighbours in the following order:
-    left, top, right, bottom. Usage map[2] yields the tuple (k,l) that adresses 
+    left, top, right, bottom. Usage map[2] yields the tuple (k,l) that adresses
     the right neighbour. Spin of right neighbour would be x[map[2][0],map[2][1]] """
-    
+
     N,M = x.shape
     x_map = [[i-1,j], [i,j-1], [i+1,j], [i,j+1]]
-    
+
     """ Make sure that indices are in range """
     if x_map[0][0] == -1:
         x_map[0][0] += N
@@ -152,7 +151,7 @@ def compute_neighbour_map(x, i, j):
         x_map[3][1] = 0
 
     return x_map
-    
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         L = int(sys.argv[1])
@@ -170,7 +169,7 @@ if __name__ == '__main__':
 
     samples_metropolis = [ metropolis(10000, boltzmann_distribution(T), flip_random_spin, sigma)[0] for T in Ts ]
     sum_spins_metropolis = [ [ compute_magnetization(sample) for sample in samples ] for samples in samples_metropolis ]
-#    mean_energy_per_site_metropolis = np.array([ [mean(compute_energy(sample, x_maps)) for sample in samples ] for samples in samples_metropolis ]) / (L*L)
+    #mean_energy_per_site_metropolis = np.array([ [mean(compute_energy(sample, x_maps)) for sample in samples ] for samples in samples_metropolis ]) / (L*L)
     mean_energy_per_site_metropolis = np.array([ mean( np.array([ compute_energy(sample, x_maps) for sample in samples ]) ) for samples in samples_metropolis ]) / (L*L)
     mean_magnetization_per_site_metropolis = [ mean(np.abs(sum_spin)) for sum_spin in sum_spins_metropolis ]
 

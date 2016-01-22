@@ -4,11 +4,11 @@ from ex3 import runge
 from matplotlib import pyplot as plt
 
 def metropolis(N, P, trial_move, phi0, dphi = 0.1):
-    if (phi0.__class__.__name__ == 'ndarray'):
+    if isinstance(phi0, np.ndarray):
         d = phi0.shape[0]
-    elif (phi0.__class__.__name__ == 'list'):
+    elif isinstance(phi0, list):
         d = len(phi0)
-    elif (phi0.__class__.__name__ == 'int') or (phi0.__class__.__name__ == 'float'):
+    elif isinstance(phi0, (int, float)):
         d = 1
     samples = np.zeros((N,d))
     phi = np.array(phi0)
@@ -31,7 +31,7 @@ def metropolis(N, P, trial_move, phi0, dphi = 0.1):
     """ N-1 because the initial state phi0 should not be included """
     return samples, acceptance_rate
 
-def trial_move(phi, dphi = 0.1): 
+def trial_move(phi, dphi = 0.1):
     factor = dphi * (np.random.random()*2 -1)
     """ Uniform in [-dphi, dphi[ """
     new_phi = phi + factor * np.ones_like(phi)
@@ -55,11 +55,10 @@ if __name__ == '__main__':
         axes[i].set_ylabel('#')
         axes[i].set_title('$\Delta x = {}$'.format(dphi[i]))
         print('{} dx={} acceptance rate={}\n'.format(i, dphi[i], acc[i]))
-        
+
     ax1.hist(sam1, bins=100, range=(-5.,5.))
     ax2.hist(sam2, bins=100, range=(-5.,5.))
     ax3.hist(sam3, bins=100, range=(-5.,5.))
     ax4.hist(sam4, bins=100, range=(-5.,5.))
-    
-    f.savefig('hist_runge.pdf')
 
+    f.savefig('hist_runge.pdf')
