@@ -10,6 +10,11 @@ setup(
                   sources=["gsl.pyx"],
                   include_dirs=[numpy.get_include()],
                   libraries=["gsl", "gslcblas"]
+                  ),
+        Extension("mc",
+                  sources=["mc.pyx"],
+                  include_dirs=[numpy.get_include()],
+                  libraries=["m"]
                   )
     ],
 )

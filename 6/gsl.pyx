@@ -22,11 +22,11 @@ cdef void init():
   r = gsl_rng_alloc(gsl_rng_taus)
 
 # Generate a random integer between 0 and N-1.
-cdef long randint(long N):
+cpdef long randint(long N):
   return gsl_rng_uniform_int(r, N)
 
 # Generate a random float between 0.0 and 1.0.
-cdef double rand():
+cpdef double rand():
   return gsl_rng_uniform(r)
 
 # Cython interface to C function
