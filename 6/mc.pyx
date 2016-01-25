@@ -1,3 +1,4 @@
+import cython
 import numpy
 cimport numpy
 
@@ -19,6 +20,9 @@ def compute_energy(numpy.ndarray[long, ndim = 2] sigma not None):
 
     return E
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 def core(long E, long mu,
          numpy.ndarray[long, ndim = 1] Es not None,
          numpy.ndarray[long, ndim = 1] ms not None,
@@ -28,7 +32,7 @@ def core(long E, long mu,
 
     cdef int L = sigma.shape[0], V = L * L
     cdef int dE = 0, dmu = 0, deltaE
-    cdef int i, j
+    cdef unsigned int i, j
 
     for sweep in range(num_sweeps):
         for step in range(V):
