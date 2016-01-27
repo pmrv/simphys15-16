@@ -20,13 +20,13 @@ def compute_act_error(x):
     while k < 6*tau_int:
         acf = ((x[:N-k]*x[k:]).mean() - xmean*xmean) / xvar
         tau_int += acf
-        N_eff = N/(2*tau_int)
-        err_tau = tau_int*sqrt(12./N_eff)
 
         acfs.append(acf)
         tau_ints.append(tau_int)
         k += 1
 
+    N_eff = N/(2*tau_int)
+    err_tau = tau_int*sqrt(12./N_eff)
     err_x = sqrt(xvar/N*2.0*tau_int)
     return xmean, xvar, err_x, tau_int, err_tau, N_eff, \
         array(acfs), array(tau_ints)
