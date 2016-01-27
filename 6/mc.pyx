@@ -21,7 +21,6 @@ def compute_energy(numpy.ndarray[long, ndim = 2] sigma not None):
     return E
 
 @cython.boundscheck(False)
-@cython.wraparound(False)
 @cython.cdivision(True)
 def core(long E, long mu,
          numpy.ndarray[long, ndim = 1] Es not None,
@@ -30,10 +29,9 @@ def core(long E, long mu,
          numpy.ndarray[long, ndim = 2] sigma not None,
          double beta):
 
-    cdef int L = sigma.shape[0], V = L * L
-    cdef int dE = 0, dmu = 0, deltaE
-    cdef unsigned int i, j
+    cdef int L = sigma.shape[0], V = L * L, deltaE
 
+    cdef int i, j
     for sweep in range(num_sweeps):
         for step in range(V):
             # flip single spin

@@ -52,7 +52,7 @@ def monte_carlo_ising(L, T, num_sweeps):
 
     mc.core(E, mu, Es, ms, num_sweeps, sigma, beta)
 
-    Es = Es.astype(float) / V
+    Es = Es/float(V)
     ms = abs(ms)/float(V)
     Emean, _, Eerr, tauE, _, _, _, _ = compute_act_error(Es)
     mmean, _, merr, tauM, _, _, _, _ = compute_act_error(ms)
