@@ -30,8 +30,8 @@ def core(long E, long mu,
          double beta):
 
     cdef int L = sigma.shape[0], V = L * L, deltaE
-
     cdef int i, j
+
     for sweep in range(num_sweeps):
         for step in range(V):
             # flip single spin

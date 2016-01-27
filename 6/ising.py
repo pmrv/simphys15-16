@@ -1,6 +1,7 @@
 from numpy import *
 from matplotlib.pyplot import *
 from argparse import ArgumentParser as AP
+import multiprocessing.pool
 
 import gsl
 import mc
@@ -35,7 +36,7 @@ def compute_act_error(x):
 ##################################################
 ## MONTE CARLO
 ##################################################
-def monte_carlo_ising(L, T, num_sweeps):
+def monte_carlo_ising( (L, T, num_sweeps) ):
     V = L*L
     beta = 1.0/T
 
@@ -61,56 +62,61 @@ def monte_carlo_ising(L, T, num_sweeps):
 
     return Emean, Eerr, mmean, merr, sigma
 
-parser = AP()
-parser.add_argument("-n", "--sweeps", type = int, default = 1000,
-                    help = "number of iterations to be done in MC calculation")
-parser.add_argument("-L", "--size", type = int, nargs = "+", default = [16],
-                    help = "system size")
-parser.add_argument("-p", "--plot", action = "store_true",
-                    help = "whether to plot data at the end or not")
-parser.add_argument("-T", "--temp", type = float, nargs = 3, default = (1.0, 5.0, 0.1),
-                    help = "temperature range")
-args = parser.parse_args()
+if __name__ == "__main__":
+    parser = AP()
+    parser.add_argument("-n", "--sweeps", type = int, default = 1000,
+                        help = "number of iterations to be done in MC calculation")
+    parser.add_argument("-L", "--size", type = int, nargs = "+", default = [16],
+                        help = "system size")
+    parser.add_argument("-p", "--plot", action = "store_true",
+                        help = "whether to plot data at the end or not")
+    parser.add_argument("-T", "--temp", type = float, nargs = 3, default = (1.0, 5.0, 0.1),
+                        help = "temperature range")
+    parser.add_argument("-c", "--cores", type = int, default = 1,
+                        help = "how many cores should be used")
+    args = parser.parse_args()
 
-# Main program
-Ts = arange(*args.temp)
+    # Main program
+    Ts = arange(*args.temp)
+    pool = multiprocessing.pool.Pool(args.cores)
 
-# Main program
-for L in args.size:
-    print "MC (L={})".format(L)
+    # Main program
+    for L in args.size:
+        print "MC (L={})".format(L)
 
-    Emeans = []
-    Eerrs = []
-    mmeans = []
-    merrs = []
-    sigmas = []
+        Emeans = []
+        Eerrs = []
+        mmeans = []
+        merrs = []
+        sigmas = []
 
-    for T in Ts:
-        Emean, Eerr, mmean, merr, sigma = monte_carlo_ising(L, T, args.sweeps)
-        Emeans.append(Emean)
-        Eerrs.append(Eerr)
-        mmeans.append(mmean)
-        merrs.append(merr)
-        sigmas.append(sigma)
+        # why are we using py2 again? I want pool.starmap!
+        for Emean, Eerr, mmean, merr, sigma in pool.map(
+                monte_carlo_ising, zip([L]*len(Ts), Ts, [args.sweeps]*len(Ts))):
+            Emeans.append(Emean)
+            Eerrs.append(Eerr)
+            mmeans.append(mmean)
+            merrs.append(merr)
+            sigmas.append(sigma)
+
+        if args.plot:
+            figure(0)
+            subplot(211, title='Energy vs. Temperature')
+            errorbar(Ts, Emeans, yerr=Eerrs, fmt='o-', label='MC L={}'.format(L))
+            legend()
+
+            subplot(212, title='Magnetization vs. Temperature')
+            errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
+            legend()
 
     if args.plot:
-        figure(0)
-        subplot(211, title='Energy vs. Temperature')
-        errorbar(Ts, Emeans, yerr=Eerrs, fmt='o-', label='MC L={}'.format(L))
-        legend()
+        figure('Final states')
+        numplots = len(sigmas)
+        cols = int(ceil(sqrt(numplots)))
+        rows = int(ceil(numplots/float(cols)))
+        for i in range(numplots):
+            subplot(rows, cols, i+1, title='T={}'.format(Ts[i]))
+            axis('off')
+            imshow(sigmas[i], interpolation='nearest')
 
-        subplot(212, title='Magnetization vs. Temperature')
-        errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
-        legend()
-
-if args.plot:
-    figure('Final states')
-    numplots = len(sigmas)
-    cols = int(ceil(sqrt(numplots)))
-    rows = int(ceil(numplots/float(cols)))
-    for i in range(numplots):
-        subplot(rows, cols, i+1, title='T={}'.format(Ts[i]))
-        axis('off')
-        imshow(sigmas[i], interpolation='nearest')
-
-    show()
+        show()
