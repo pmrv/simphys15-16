@@ -1,5 +1,6 @@
 from numpy import *
 from matplotlib.pyplot import *
+from argparse import ArgumentParser as AP
 
 import gsl
 import mc
@@ -60,12 +61,22 @@ def monte_carlo_ising(L, T, num_sweeps):
 
     return Emean, Eerr, mmean, merr, sigma
 
-# Main program
-num_sweeps = 10000
-Ts = arange(1.0, 5.0, 0.1)
+parser = AP()
+parser.add_argument("-n", "--sweeps", type = int, default = 1000,
+                    help = "number of iterations to be done in MC calculation")
+parser.add_argument("-L", "--size", type = int, nargs = "+", default = [16],
+                    help = "system size")
+parser.add_argument("-p", "--plot", action = "store_true",
+                    help = "whether to plot data at the end or not")
+parser.add_argument("-T", "--temp", type = float, nargs = 3, default = (1.0, 5.0, 0.1),
+                    help = "temperature range")
+args = parser.parse_args()
 
 # Main program
-for L in [16]:
+Ts = arange(*args.temp)
+
+# Main program
+for L in args.size:
     print "MC (L={})".format(L)
 
     Emeans = []
@@ -75,31 +86,31 @@ for L in [16]:
     sigmas = []
 
     for T in Ts:
-        Emean, Eerr, mmean, merr, sigma = monte_carlo_ising(L, T, num_sweeps)
+        Emean, Eerr, mmean, merr, sigma = monte_carlo_ising(L, T, args.sweeps)
         Emeans.append(Emean)
         Eerrs.append(Eerr)
         mmeans.append(mmean)
         merrs.append(merr)
         sigmas.append(sigma)
 
-"""
-    figure(0)
-    subplot(211, title='Energy vs. Temperature')
-    errorbar(Ts, Emeans, yerr=Eerrs, fmt='o-', label='MC L={}'.format(L))
-    legend()
+    if args.plot:
+        figure(0)
+        subplot(211, title='Energy vs. Temperature')
+        errorbar(Ts, Emeans, yerr=Eerrs, fmt='o-', label='MC L={}'.format(L))
+        legend()
 
-    subplot(212, title='Magnetization vs. Temperature')
-    errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
-    legend()
+        subplot(212, title='Magnetization vs. Temperature')
+        errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
+        legend()
 
-figure('Final states')
-numplots = len(sigmas)
-cols = int(ceil(sqrt(numplots)))
-rows = int(ceil(numplots/float(cols)))
-for i in range(numplots):
-    subplot(rows, cols, i+1, title='T={}'.format(Ts[i]))
-    axis('off')
-    imshow(sigmas[i], interpolation='nearest')
+if args.plot:
+    figure('Final states')
+    numplots = len(sigmas)
+    cols = int(ceil(sqrt(numplots)))
+    rows = int(ceil(numplots/float(cols)))
+    for i in range(numplots):
+        subplot(rows, cols, i+1, title='T={}'.format(Ts[i]))
+        axis('off')
+        imshow(sigmas[i], interpolation='nearest')
 
-show()
-"""
+    show()
