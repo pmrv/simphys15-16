@@ -2,6 +2,9 @@ from numpy import *
 from matplotlib.pyplot import *
 from argparse import ArgumentParser as AP
 import multiprocessing.pool
+from datetime import datetime
+import pickle
+import gzip
 
 import gsl
 import mc
@@ -70,14 +73,17 @@ if __name__ == "__main__":
                         help = "system size")
     parser.add_argument("-p", "--plot", action = "store_true",
                         help = "whether to plot data at the end or not")
-    parser.add_argument("-T", "--temp", type = float, nargs = 3, default = (1.0, 5.0, 0.1),
-                        help = "temperature range")
+    parser.add_argument("-s", "--store", action = "store_true",
+                        help = "whether to write out data at the end or not")
+    parser.add_argument("-T", "--temperature", type = float, nargs = 3,
+                        default = (1.0, 5.0, 0.1), help = "temperature range")
     parser.add_argument("-c", "--cores", type = int, default = 1,
                         help = "how many cores should be used")
     args = parser.parse_args()
 
     # Main program
-    Ts = arange(*args.temp)
+    T0, T1, Tstep = args.temperature
+    Ts = linspace(T0, T1, (T1 - T0) / Tstep + 1)
     pool = multiprocessing.pool.Pool(args.cores)
 
     # Main program
@@ -99,6 +105,10 @@ if __name__ == "__main__":
             merrs.append(merr)
             sigmas.append(sigma)
 
+        Emeans = array(Emeans)
+        Eerrs  = array(Eerrs)
+        mmeans = array(mmeans)
+        merrs  = array(merrs)
         if args.plot:
             figure(0)
             subplot(211, title='Energy vs. Temperature')
@@ -108,6 +118,9 @@ if __name__ == "__main__":
             subplot(212, title='Magnetization vs. Temperature')
             errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
             legend()
+        if args.store:
+            with gzip.open("ising-{}.dat".format(datetime.now()), 'w') as fdat:
+                pickle.dump([Ts, Emeans, Eerrs, mmeans, merrs, num_sweeps], fdat)
 
     if args.plot:
         figure('Final states')
