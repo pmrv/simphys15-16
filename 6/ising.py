@@ -63,7 +63,7 @@ def monte_carlo_ising( (L, T, num_sweeps) ):
     print "\rT = {} tau_E = {} tau_M = {} E = {}+/-{} m = {}+/-{}"\
         .format(T, tauE, tauM, Emean, Eerr, mmean, merr)
 
-    return Emean, Eerr, mmean, merr, sigma
+    return Emean, Eerr, mmean, merr, sigma, Es, ms
 
 if __name__ == "__main__":
     parser = AP()
@@ -79,11 +79,13 @@ if __name__ == "__main__":
                         default = (1.0, 5.0, 0.1), help = "temperature range")
     parser.add_argument("-c", "--cores", type = int, default = 1,
                         help = "how many cores should be used")
+    parser.add_argument("-b", "--binder", action = "store_true",
+                        help = "whether to calculate Binder U at each temperature or not")
     args = parser.parse_args()
 
     # Main program
     T0, T1, Tstep = args.temperature
-    Ts = linspace(T0, T1, (T1 - T0) / Tstep + 1)
+    Ts = linspace(T0, T1, round((T1 - T0) / Tstep) + 1)
     pool = multiprocessing.pool.Pool(args.cores)
 
     # Main program
@@ -95,20 +97,25 @@ if __name__ == "__main__":
         mmeans = []
         merrs = []
         sigmas = []
+        if args.binder:
+            binders = []
 
         # why are we using py2 again? I want pool.starmap!
-        for Emean, Eerr, mmean, merr, sigma in pool.map(
+        for Emean, Eerr, mmean, merr, sigma, _, ms in pool.map(
                 monte_carlo_ising, zip([L]*len(Ts), Ts, [args.sweeps]*len(Ts))):
             Emeans.append(Emean)
             Eerrs.append(Eerr)
             mmeans.append(mmean)
             merrs.append(merr)
             sigmas.append(sigma)
+            if args.binder:
+                binders.append(1 - 1./3 * (ms**4).mean() / (ms**2).mean()**2)
 
-        Emeans = array(Emeans)
-        Eerrs  = array(Eerrs)
-        mmeans = array(mmeans)
-        merrs  = array(merrs)
+        Emeans  = array(Emeans)
+        Eerrs   = array(Eerrs)
+        mmeans  = array(mmeans)
+        merrs   = array(merrs)
+        binders = array(binders)
         if args.plot:
             figure(0)
             subplot(211, title='Energy vs. Temperature')
@@ -119,8 +126,12 @@ if __name__ == "__main__":
             errorbar(Ts, mmeans, yerr=merrs, fmt='o-', label='MC L={}'.format(L))
             legend()
         if args.store:
-            with gzip.open("ising-{}.dat".format(datetime.now()), 'w') as fdat:
-                pickle.dump([Ts, Emeans, Eerrs, mmeans, merrs, num_sweeps], fdat)
+            with gzip.open("ising{}-{}-{}-{}.dat".format(
+                    "-binder" * args.binder, L, args.sweeps, datetime.now()), 'w') as fdat:
+                if args.binder:
+                    pickle.dump([Ts, Emeans, Eerrs, mmeans, merrs, binders], fdat)
+                else:
+                    pickle.dump([Ts, Emeans, Eerrs, mmeans, merrs], fdat)
 
     if args.plot:
         figure('Final states')
