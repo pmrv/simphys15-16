@@ -1,0 +1,88 @@
+\RequirePackage[l2tabu,orthodox]{nag} % turn on warnings because of bad style
+\documentclass[a4paper,11pt,bibtotoc]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{0394}{\Delta}
+\usepackage[T1]{fontenc}        % Tries to use Postscript Type 1 Fonts for better rendering
+\usepackage{lmodern}            % Provides the Latin Modern Font which offers more glyphs than the default Computer Modern
+\usepackage[intlimits]{amsmath} % Provides all mathematical commands
+
+\usepackage{hyperref}           % Provides clickable links in the PDF-document for \ref
+\usepackage{grffile}            % Allow you to include images (like graphicx). Usage: \includegraphics{path/to/file}
+
+% Allows to set units
+\usepackage[ugly]{units}
+
+% Additional packages
+\usepackage{url}                % Lets you typeset urls. Usage: \url{http://...}
+\usepackage{breakurl}           % Enables linebreaks for urls
+\usepackage{xspace}             % Use \xpsace in macros to automatically insert space based on context. Usage: \newcommand{\es}{ESPResSo\xspace}
+\usepackage{xcolor}             % Obviously colors. Usage: \color{red} Red text
+\usepackage{booktabs}           % Nice rules for tables. Usage \begin{tabular}\toprule ... \midrule ... \bottomrule
+
+% Source code listings
+\usepackage{listings}           % Source Code Listings. Usage: \begin{lstlisting}...\end{lstlisting}
+\lstloadlanguages{python}       % Default highlighting set to "python"
+
+\usepackage{epsfig}
+\usepackage{cleveref}
+\usepackage{subcaption}
+
+\title{Worksheet 6: Finite-Size Scaling and the Ising Model}
+\author{Evangelos Ribeiro Tzaras \and Marvin Poul}
+
+\begin{document}
+
+\maketitle
+
+\section{Speeding up the Simulation}
+
+First we used the \texttt{GSL} library for random number generation, because we need
+this in every MC iteration and it is faster than \texttt{numpy}'s RNG. Next
+the inner loops of the MC routine and the initial energy computation were moved
+into a Cython module. The former are an obvious optimization target, because
+this is where the actual work of the program is performed. The latter is less
+obvious because it is only run once per MC run, but profiling revealed it had
+never the less an impact. While the error calculation also has potential for
+optimization, we decided against moving it into a Cython module, because
+profiling showed that even for high numbers of collected samples its runtime is
+on average at least an order of magnitude smaller than that of the MC routine
+and it is hence not worth the hassle.
+
+\section{Determining Equilibrium Values and Errors}
+
+Results for runs with $L \in \{16, 64\}$ and $T \in [1.0, 5.0, 0.1]$ are
+summarized in \cref{fig:energy,fig:magnetization}. Before the phase transition
+the magnetization curves are very similar no matter the system size, whereas
+the decrease afterwards is sharper and more pronounced the bigger the system
+size. For the energy all systems are the same regardless of size.
+After it we see no no difference between $L = 16$ and $L = 64$, while both
+are slightly higher than $L = 4$. 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{magnetization}
+    \caption{Energy over Magnetization for different system sizes}
+    \label{fig:magnetization}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{energy}
+    \caption{Energy over Temperature for different system sizes}
+    \label{fig:energy}
+\end{figure}
+
+\section{Finite-Size Scaling}
+
+The Binder parameter is plotted in \cref{fig:binder} and all curves cross at $T
+= 2.24$.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{binder}
+    \caption{Binder $U$ over Temperature}
+    \label{fig:binder}
+\end{figure}
+
+\end{document}

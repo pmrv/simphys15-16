@@ -8,12 +8,12 @@ from matplotlib.pyplot import *
 from ising import exact_sum
 
 figure(0)
-xlabel("$E$")
-ylabel("$T$")
+ylabel("$E$")
+xlabel("$T$")
 
 figure(1)
-xlabel("$m$")
-ylabel("$T$")
+ylabel("$m$")
+xlabel("$T$")
 
 for L, f in zip((16, 64), sys.argv[1:]):
     with gzip.open(f) as fdat:
@@ -21,7 +21,7 @@ for L, f in zip((16, 64), sys.argv[1:]):
 
     figure(0)
     errorbar(Ts, Emeans, yerr=Eerrs, fmt='x', label='MC L={}'.format(L))
-    legend()
+    legend(loc = "lower right")
 
     figure(1)
     errorbar(Ts, mmeans, yerr=merrs, fmt='x', label='MC L={}'.format(L))
@@ -29,11 +29,11 @@ for L, f in zip((16, 64), sys.argv[1:]):
 
 Emeans_exact, mmeans_exact = exact_sum(4, Ts)
 figure(0)
-plot(Ts, Emeans, '+', label='MC L=4 (exact)')
-legend()
+plot(Ts, Emeans_exact, '+', label='MC L=4 (exact)')
+legend(loc = "lower right")
 savefig("energy.pdf")
 
 figure(1)
-plot(Ts, mmeans, '+', label='MC L=4 (exact)')
+plot(Ts, mmeans_exact, '+', label='MC L=4 (exact)')
 legend()
 savefig("magnetization.pdf")
