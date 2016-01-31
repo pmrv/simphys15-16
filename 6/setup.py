@@ -14,7 +14,8 @@ setup(
         Extension("mc",
                   sources=["mc.pyx"],
                   include_dirs=[numpy.get_include()],
-                  libraries=["m"]
+                  libraries=["m"],
+                  extra_compile_args=["-O3"]
                   )
     ],
 )

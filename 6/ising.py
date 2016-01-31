@@ -61,7 +61,7 @@ def compute_act_error(x):
     k = 0
     tau_int = 0.5
     while k < 6*tau_int:
-        acf = ((x[:N-k]*x[k:]).mean() - xmean*xmean) / xvar
+        acf = ((x[:N-k]*x[k:]).mean() - xmean*xmean) / xvar 
         tau_int += acf
 
         acfs.append(acf)
@@ -78,6 +78,7 @@ def compute_act_error(x):
 ## MONTE CARLO
 ##################################################
 def monte_carlo_ising( (L, T, num_sweeps) ):
+
     V = L*L
     beta = 1.0/T
 
@@ -153,7 +154,8 @@ if __name__ == "__main__":
         Eerrs   = array(Eerrs)
         mmeans  = array(mmeans)
         merrs   = array(merrs)
-        binders = array(binders)
+        if args.binder:
+            binders = array(binders)
         if args.plot:
             figure(0)
             subplot(211, title='Energy vs. Temperature')
