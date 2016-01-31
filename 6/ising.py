@@ -10,6 +10,44 @@ import gsl
 import mc
 from mc import compute_energy
 
+def exact_sum(L, Ts):
+    # we compute the mean energy and magnetization for all
+    # temperatures at once!
+    ws = zeros_like(Ts)
+    Es = zeros_like(Ts)
+    ms = zeros_like(Ts)
+    # beta is a NumPy array with len(Ts) elements
+    beta = 1./Ts
+
+    V = float(L*L)
+
+    sigma = ones((L, L), dtype=int)
+    # the bit pattern of the integer "state" is used to generate all
+    # possible states of sigma
+    for state in range(2**(L*L)):
+        # read out the bitpattern
+        for i in range(L):
+            for j in range(L):
+                k = i*L + j
+                if state & 2**k > 0:
+                    sigma[i,j] = 1
+                else:
+                    sigma[i,j] = -1
+
+        # compute energy and magnetization of this state
+        E = compute_energy(sigma)
+        mu = compute_magnetization(sigma)
+
+        # this is a vector operation, as beta is a vector
+        w = exp(-beta*E)
+        ws += w
+        Es += E/V*w
+        ms += abs(mu)/V*w
+
+    Emeans = Es/ws
+    mmeans = ms/ws
+    return Emeans, mmeans
+
 def compute_magnetization(sigma):
     return sigma.sum()
 
